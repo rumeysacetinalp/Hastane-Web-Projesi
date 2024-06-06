@@ -1,0 +1,126 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hastane Giriş Sistemi</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4">
+               
+                <img src="{% static 'resimler/doktor.png' %}" >
+               
+                <div class="login-container">
+                   
+                </div>
+            </div>
+            <div class="col-md-4"> 
+                
+                <img src="{% static 'resimler/yönetici.png' %}" >
+               
+                <div class="login-container">
+                   
+                </div>
+            </div>
+            <div class="col-md-4">
+                
+                <img src="{% static 'resimler/hasta.png' %}" >
+                
+                <div class="login-container">
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+  
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.">
+    <title>Doktor Giriş</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+
+            
+            <div class="col-md-4">
+                <h2 class="mb-4">Doktor Girişi</h2>
+                {% if error_message %}
+                <div class="alert alert-danger" role="alert">
+                    {{ error_message }}
+                </div>
+                {% endif %}
+                <form action="{% url 'doktor_girisi' %}" method="POST">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="doktor_id">Doktor ID:</label>
+                        <input type="text" class="form-control" id="doktor_id" name="doktor_id" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="sifre">Şifre:</label>
+                        <input type="password" class="form-control" id="sifre" name="sifre" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Giriş Yap</button>
+                </form>
+            </div>
+
+
+
+            <div class="col-md-4">
+                <h2 class="mb-4">Yönetici Girişi</h2>
+                {% if error_message %}
+                <div class="alert alert-danger" role="alert">
+                    {{ error_message }}
+                </div>
+                {% endif %}
+                <form action="{% url 'yönetici_girisi' %}" method="POST">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="yonetici_id">Yönetici ID:</label>
+                        <input type="text" class="form-control" id="yonetici_id" name="yonetici_id" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="sifre">Şifre:</label>
+                        <input type="password" class="form-control" id="sifre" name="sifre" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Giriş Yap</button>
+                </form>
+            </div>
+               
+
+
+
+            <div class="col-md-4">
+                <h2 class="mb-4">Hasta Girişi</h2>
+                {% if error_message %}
+                <div class="alert alert-danger" role="alert">
+                    {{ error_message }}
+                </div>
+                {% endif %}
+                <form action="{% url 'randevu_girisi' %}" method="POST">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="hasta_id">Hasta ID:</label>
+                        <input type="text" class="form-control" id="hasta_id" name="hasta_id" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="sifre">Şifre:</label>
+                        <input type="password" class="form-control" id="sifre" name="sifre" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Giriş Yap</button>
+                </form>
+            </div>
+    </div>
+     
+
+</body>
+</html>

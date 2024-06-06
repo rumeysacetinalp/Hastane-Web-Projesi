@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Randevu Alma Sayfası</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Ek stiller */
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+        }
+
+        .toggle {
+            display: none;
+        }
+
+        .toggle-label {
+            background-color: #007bff;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .toggle:checked + .toggle-label {
+            background-color: #0056b3;
+        }
+
+        .form {
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            display: none; /* Form varsayılan olarak gizli */
+        }
+
+        .form-group {
+            margin-bottom: 10px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="date"],
+        .form-group input[type="time"],
+        .form-group button {
+            width: calc(100% - 10px);
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+
+        .form-group button {
+            background-color: #007bff;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        .form-group button:hover {
+            background-color: #0056b3;
+        }
+
+        .toggle:checked ~ .form {
+            display: block; /* Checkbox seçildiğinde form görünür olacak */
+        }
+    </style>
+</head>
+<body>
+
+<div class="container mt-5">
+    <!-- Kullanıcı bilgileri bölümü -->
+    {% if request.session.hasta_ad and request.session.hasta_soyad %}
+        <h1>Hoşgeldiniz, {{ request.session.hasta_ad }} {{ request.session.hasta_soyad }}!</h1>
+    {% else %}
+        <h1>Hoşgeldiniz!</h1>
+    {% endif %}
+
+    <!-- Randevu alma bölümü -->
+    <h2>Randevu Al</h2>
+    <form id="randevu-form" method="post" action="{% url 'randevu_al' %}">
+        <input type="hidden" id="hasta_id" name="hasta_id" value="{{ hasta_id }}">
+        {% csrf_token %}
+
+        <!-- Uzmanlık Alanı Seçimi -->
+        <div class="form-group">
+            <label for="uzmanlik_alani">Uzmanlık Alanı:</label>
+            <select class="form-control" id="uzmanlik_alani" name="uzmanlik_alani" required>
+                <option value="">Uzmanlık alanı seçiniz</option>
+                {% for alan in uzmanlik_alanlari %}
+                    <option value="{{ alan }}">{{ alan }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Hastane Seçimi -->
+        <div class="form-group">
+            <label for="hastane">Hastane:</label>
+            <select class="form-control" id="hastane" name="hastane" required>
+                <option value="">Seçiniz</option>
+                {% for hastane in hastaneler %}
+                    <option value="{{ hastane }}">{{ hastane }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="doktor">Doktor:</label>
+            <select class="form-control" id="doktor" name="doktor_id" required>
+                <option value="">Önce uzmanlık alanı ve hastane seçiniz</option>
+            </select>
+        </div>
+
+        <!-- Randevu Tarihi Seçimi -->
+        <div class="form-group">
+            <label for="randevu_tarihi">Randevu Tarihi:</label>
+            <input type="date" class="form-control" id="randevu_tarihi" name="randevu_tarihi" required>
+        </div>
+
+        <!-- Randevu Saati Seçimi -->
+        <div class="form-group">
+            <label>Randevu Saati:</label>
+            <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                <!-- Saat Butonları -->
+                {% for hour in hours %}
+                    <label class="btn btn-secondary">
+                        <input type="radio" name="randevu_saati" value="{{ hour }}:00"> {{ hour }}:00
+                    </label>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Randevu Al Butonu -->
+        <button type="submit" class="btn btn-primary">Randevu Al</button>
+    </form>
+
+    <!-- Randevularım Butonu -->
+    <button id="randevularim-btn" class="btn btn-info mt-3">Randevularımı Görüntüle</button>
+    <div id="randevularim-tablo" style="display: none;">
+        <h2>Randevularım</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">Randevu ID</th>
+                    <th scope="col">Randevu Tarihi</th>
+                    <th scope="col">Randevu Saati</th>
+                    <th scope="col">Doktor Adı</th>
+                    <th scope="col">Doktor Soyadı</th>
+                    <th scope="col">Uzmanlık Alanı</th>
+                    <th scope="col">Hastane</th>
+                    <th scope="col">İşlem</th>
+                </tr>
+            </thead>
+            <tbody id="randevu-tablo-body">
+                {% for randevu in randevular %}
+                    <tr id="randevu-{{ randevu.randevu_id }}">
+                        <td>{{ randevu.randevu_id }}</td>
+                        <td>{{ randevu.tarih }}</td>
+                        <td>{{ randevu.saat }}</td>
+                        <td>{{ randevu.doktor_ad }}</td>
+                        <td>{{ randevu.doktor_soyad }}</td>
+                        <td>{{ randevu.uzmanlik }}</td>
+                        <td>{{ randevu.hastane }}</td>
+                        <td>
+                            <button class="btn btn-danger btn-sil" data-randevu-id="{{ randevu.randevu_id }}">Sil</button>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="8">Hasta randevusu bulunamadı.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function() {
+        // Randevularım Butonu'na tıklandığında tabloyu göster veya gizle
+        $('#randevularim-btn').click(function() {
+            $('#randevularim-tablo').toggle();
+        });
+
+        // Doktor ve Hastane değişikliklerinde Doktorları getir
+        $('#uzmanlik_alani, #hastane').change(function() {
+            var uzmanlik_alani = $('#uzmanlik_alani').val();
+            var hastane = $('#hastane').val();
+
+            if (uzmanlik_alani && hastane) {
+                $.ajax({
+                    url: '{% url "doktorlari_getir" %}',
+                    data: {
+                        'uzmanlik_alani': uzmanlik_alani,
+                        'hastane': hastane
+                    },
+                    success: function(data) {
+                        console.log(data); // Gelen verileri konsola yazdır
+                        var doktorSelect = $('#doktor');
+                        doktorSelect.empty();
+                        if (data.doktorlar.length > 0) {
+                            data.doktorlar.forEach(function(doktor) {
+                                doktorSelect.append(new Option(doktor.ad + ' ' + doktor.soyad, doktor.id));
+                            });
+                        } else {
+                            doktorSelect.append(new Option('Bu kriterlere uygun doktor bulunamadı', ''));
+                        }
+                    }
+                });
+            } else {
+                $('#doktor').empty().append(new Option('Önce uzmanlık alanı ve hastane seçiniz', ''));
+            }
+        });
+
+        // Randevu Formunun gönderimi
+        $('#randevu-form').submit(function(event) {
+            // Formun varsayılan gönderimini engelle
+            event.preventDefault();
+
+            // Ajax ile form gönderimini gerçekleştir
+            $.ajax({
+                url: $(this).attr('action'),
+                method: $(this).attr('method'),
+                data: $(this).serialize(),
+                success: function(response) {
+                    // Başarılı gönderim sonrasında formu sıfırla
+                    $('#randevu-form')[0].reset();
+
+                    // Yeni randevuları tabloya ekle
+                    var yeniRandevular = response.yeni_randevular;
+                    var tabloBody = $('#randevu-tablo-body');
+                    tabloBody.empty(); // Mevcut tabloyu temizle
+
+                    yeniRandevular.forEach(function(randevu) {
+                        var yeniSatir = `
+                            <tr id="randevu-${randevu.randevu_id}">
+                                <td>${randevu.randevu_id}</td>
+                                <td>${randevu.tarih}</td>
+                                <td>${randevu.saat}</td>
+                                <td>${randevu.doktor_ad}</td>
+                                <td>${randevu.doktor_soyad}</td>
+                                <td>${randevu.uzmanlik}</td>
+                                <td>${randevu.hastane}</td>
+                                <td>
+                                    <button class="btn btn-danger btn-sil" data-randevu-id="${randevu.randevu_id}">Sil</button>
+                                </td>
+                            </tr>
+                        `;
+                        tabloBody.append(yeniSatir);
+                    });
+
+                    // Başarı mesajı gösterebilirsiniz
+                    alert('Randevu başarıyla alındı!');
+                },
+                error: function(xhr, status, error) {
+                    // Herhangi bir hata durumunda kullanıcıya uyarı ver
+                    console.error(error);
+                    alert('Randevu alınırken bir hata oluştu. Lütfen tekrar deneyin.');
+                }
+            });
+        });
+
+        // Randevu Silme İşlemi
+        $('#randevu-tablo-body').on('click', '.btn-sil', function() {
+            var randevuId = $(this).data('randevu-id');
+            var hastaId = $('#hasta_id').val();
+
+            if (confirm('Bu randevuyu silmek istediğinize emin misiniz?')) {
+                $.ajax({
+                    url: '{% url "randevu_sil" %}',
+                    method: 'POST',
+                    data: {
+                        'randevu_id': randevuId,
+                        'hasta_id': hastaId,
+                        'csrfmiddlewaretoken': '{{ csrf_token }}'
+                    },
+                    success: function(response) {
+                        // Başarılı silme işlemi sonrasında tabloyu güncelle
+                        var yeniRandevular = response.yeni_randevular;
+                        var tabloBody = $('#randevu-tablo-body');
+                        tabloBody.empty(); // Mevcut tabloyu temizle
+
+                        yeniRandevular.forEach(function(randevu) {
+                            var yeniSatir = `
+                                <tr id="randevu-${randevu.randevu_id}">
+                                    <td>${randevu.randevu_id}</td>
+                                    <td>${randevu.tarih}</td>
+                                    <td>${randevu.saat}</td>
+                                    <td>${randevu.doktor_ad}</td>
+                                    <td>${randevu.doktor_soyad}</td>
+                                    <td>${randevu.uzmanlik}</td>
+                                    <td>${randevu.hastane}</td>
+                                    <td>
+                                        <button class="btn btn-danger btn-sil" data-randevu-id="${randevu.randevu_id}">Sil</button>
+                                    </td>
+                                </tr>
+                            `;
+                            tabloBody.append(yeniSatir);
+                        });
+
+                        alert('Randevu başarıyla silindi!');
+                    },
+                    error: function(xhr, status, error) {
+                        console.error(error);
+                        alert('Randevu silinirken bir hata oluştu. Lütfen tekrar deneyin.');
+                    }
+                });
+            }
+        });
+    });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

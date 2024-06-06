@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alt Başlık Menüsü</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha384-KyZXEAg3QhqLMpG8r+Knujsl5+z8vwZc5/dm8nDaveM2RtcK+1Gp2OqFz4M5lU5f" crossorigin="anonymous"></script>
+    <style>
+       
+        .alt-basliklar {
+            display: none; 
+        }
+        .ust-baslik:hover + .alt-basliklar,
+        .alt-basliklar:hover {
+            display: block; /* Üzerine gelindiğinde  görünür */
+        }
+    </style>
+</head>
+<body>
+
+    
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container">
+        <a class="navbar-brand" href="#">Hasta, Doktor ve Tıbbi Rapor İşlemleri</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link ust-baslik" href="#">Hasta İşlemleri</a>
+                    <ul class="list-unstyled alt-basliklar" id="hastaIslemleriMenu">
+                        <li><a href="#" class="nav-link" onclick="toggleHastaEkleForm()">Hasta Ekle</a></li>
+                        <li><a href="#" class="nav-link" onclick="toggleHastaSilForm()">Hasta Silme veya Güncelleme</a></li>
+                        
+                        
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link ust-baslik" href="#">Doktor İşlemleri</a>
+                   <ul class="list-unstyled alt-basliklar">
+                    <li><a href="#" class="nav-link" onclick="toggleDoktorEkleForm()">Doktor Ekle</a></li>
+                        <li><a href="#" class="nav-link" onclick="toggleDoktorSilForm()">Doktor Silme veya Güncelleme</a></li>
+                        
+                    </ul>
+
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link ust-baslik" href="#">Tıbbi Rapor İşlemleri</a>
+                    <ul class="list-unstyled alt-basliklar">
+                        <li><a href="#" class="nav-link">Tıbbi Rapor Ekle</a></li>
+                        <li><a href="#" class="nav-link">Tıbbi Rapor Sil</a></li>
+                    </ul>
+
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+
+
+
+<div id="hastaEkleForm" style="display: none;" class="container mt-4">
+    <h2>Hasta Ekle</h2>
+    <form id="formHastaEkle" method="POST" action="{% url 'hasta-ekle' %}">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="ad">Ad:</label>
+            <input type="text" class="form-control" id="ad" name="ad" required>
+        </div>
+        <div class="form-group">
+            <label for="soyad">Soyad:</label>
+            <input type="text" class="form-control" id="soyad" name="soyad" required>
+        </div>
+        <div class="form-group">
+            <label for="dogumTarihi">Doğum Tarihi:</label>
+            <input type="date" class="form-control" id="dogumTarihi" name="dogumTarihi" required>
+        </div>
+        <div class="form-group">
+            <label for="cinsiyet">Cinsiyet:</label>
+            <select class="form-control" id="cinsiyet" name="cinsiyet" required>
+                <option value="Erkek">Erkek</option>
+                <option value="Kadın">Kadın</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="telefon">Telefon:</label>
+            <input type="tel" class="form-control" id="telefon" name="telefon" required>
+        </div>
+        <div class="form-group">
+            <label for="adres">Adres:</label>
+            <textarea class="form-control" id="adres" name="adres" rows="3" required></textarea>
+        </div>
+       
+
+       <div class="form-group">
+        <label for="sifre">Şifre:</label>
+        <input type="password" class="form-control" id="sifre" name="sifre" required>
+       </div>
+    <button type="submit" class="btn btn-primary">Ekle</button>
+</form>
+
+
+    <div id="mesaj" class="mt-3"></div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var formHastaEkle = document.getElementById("formHastaEkle");
+        formHastaEkle.addEventListener("submit", function(event) {
+            event.preventDefault(); // Formun otomatik olarak gönderilmesini engelle
+    
+            var formData = new FormData(formHastaEkle);
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "{% url 'hasta-ekle' %}", true);
+            xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest"); // AJAX isteği olduğunu belirtmek için başlık ekle
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    // Başarılı bir şekilde yanıt alındığında
+                    var response = JSON.parse(xhr.responseText);
+                    if (response.success) {
+                        showSuccessMessage(response.message);
+                        clearFormFields(); // Form alanlarını temizle
+                    } else {
+                        alert("Bir hata oluştu. Lütfen tekrar deneyin.");
+                    }
+                }
+            };
+            xhr.send(formData);
+        });
+    });
+    
+    function showSuccessMessage(message) {
+        alert(message); // Başarılı mesajı göster
+    }
+    
+   
+    
+</script>
+
+
+
+
+<div id="hastaSilForm" style="display: none;" class="container mt-4">
+    <h2>Hasta Sil veya Güncelle </h2>
+    <input type="text" id="hastaAraInput" class="form-control mb-2" placeholder="Hasta Adı veya Soyadı">
+    <div id="hastaListesi" class="mb-3"></div>
+    <button class="btn btn-primary" onclick="searchHasta()">Ara</button>
+    <div id="silmeMesaji" class="mt-3"></div>
+</div>
+
+<div id="hastaEditForm" style="display: none;" class="container mt-4">
+    <h2>Hasta Güncelle</h2>
+    <input type="text" id="editHastaAdi" class="form-control mb-2" placeholder="Hastanın Adı">
+    <input type="text" id="editHastaSoyadi" class="form-control mb-2" placeholder="Hastanın Soyadı">
+    <input type="text" id="editHastaTelefon" class="form-control mb-2" placeholder="Telefon">
+    <input type="text" id="editHastaAdres" class="form-control mb-2" placeholder="Adres">
+</div>
+
+
+
+<script>
+    function searchHasta() {
+        var hastaAraInput = document.getElementById("hastaAraInput").value;
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "{% url 'hasta-ara' %}?hasta_ad=" + hastaAraInput, true);
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                var response = JSON.parse(xhr.responseText);
+                displayHastaList(response.hastalar);
+            }
+        };
+        xhr.send();
+    }
+
+    
+    function displayHastaList(hastalar) {
+        var hastaListesiDiv = document.getElementById("hastaListesi");
+        hastaListesiDiv.innerHTML = "";
+        if (hastalar.length > 0) {
+            var ul = document.createElement("ul");
+            ul.classList.add("list-group");
+            hastalar.forEach(function (hasta) {
+                var li = document.createElement("li");
+                li.classList.add("list-group-item");
+                li.appendChild(document.createTextNode(hasta.ad + " " + hasta.soyad));
+                var silButton = document.createElement("button");
+                silButton.classList.add("btn", "btn-danger", "btn-sm", "float-right");
+                silButton.textContent = "Sil";
+                silButton.setAttribute("data-hasta-id", hasta.id);
+                silButton.onclick = function () {
+                    deleteHasta(silButton.getAttribute("data-hasta-id")); 
+                };
+                li.appendChild(silButton);
+    
+                var updateButton = document.createElement("button");
+                updateButton.classList.add("btn", "btn-primary", "btn-sm", "float-right", "mr-2");
+                updateButton.textContent = "Güncelle";
+                updateButton.setAttribute("data-hasta-id", hasta.id);
+                updateButton.onclick = function () {
+                    showEditForm1(hasta);
+                };
+                li.appendChild(updateButton);
+    
+                ul.appendChild(li);
+            });
+            hastaListesiDiv.appendChild(ul);
+        } else {
+            hastaListesiDiv.innerHTML = "Hasta bulunamadı.";
+        }
+    }
+
+
+
+    function showEditForm1(hasta) {
+        var editFormDiv = document.getElementById("hastaEditForm");
+        editFormDiv.style.display = "block"; // Formu görünür yap
+    
+        console.log("Hasta bilgileri:", hasta); // Gelen hasta bilgilerini konsola yazdır
+    
+        var adInput = document.getElementById("editHastaAdi");
+        adInput.value = hasta.ad;
+        console.log("Ad input değeri:", adInput.value); // Ad input kontrol
+    
+        var soyadInput = document.getElementById("editHastaSoyadi");
+        soyadInput.value = hasta.soyad;
+        console.log("Soyad input değeri:", soyadInput.value); // Soyad input kontrol
+    
+        var telefonInput = document.getElementById("editHastaTelefon");
+        telefonInput.value = hasta.telefon ? hasta.telefon : '';
+        console.log("Telefon input değeri:", telefonInput.value); // Telefon input kontrol
+    
+        var adresInput = document.getElementById("editHastaAdres");
+        adresInput.value = hasta.adres ? hasta.adres : '';
+        console.log("Adres input değeri:", adresInput.value); // Adres input kontrol
+    
+        // Önceki güncelleme butonunu kaldır
+        var existingUpdateButton = document.querySelector("#hastaEditForm button");
+        if (existingUpdateButton) {
+            existingUpdateButton.remove();
+        }
+    
+        var updateButton = document.createElement("button");
+        updateButton.classList.add("btn", "btn-primary");
+        updateButton.textContent = "Güncelle";
+        updateButton.onclick = function () {
+            var hastaId = hasta.id;
+            updateHasta(hastaId);
+        };
+        editFormDiv.appendChild(updateButton);
+    }
+
+    function updateHasta(hasta_id) {
+        
+        
+        var ad = document.getElementById("editHastaAdi").value;
+        var soyad = document.getElementById("editHastaSoyadi").value;
+        var telefon = document.getElementById("editHastaTelefon").value;
+        var adres = document.getElementById("editHastaAdres").value;
+        
+     
+        console.log("Güncellenecek hasta ID:", hasta_id);
+        console.log("Ad:", ad);
+        console.log("Soyad:", soyad);
+        console.log("Telefon:", telefon);
+        console.log("Adres:", adres);
+
+
+        fetch('/hasta-guncelle/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken'),
+            },
+            body: JSON.stringify({
+                'hasta_id': hasta_id, 
+                'ad': ad,
+                'soyad': soyad,
+                'telefon': telefon,
+                'adres': adres
+            }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+                searchHasta(); 
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Hasta güncellenirken bir hata oluştu:', error);
+        });
+    }
+
+
+    function deleteHasta(hasta_id) {
+    // hasta_id'nin tanımlı ve boş olmadığından emin olun
+    if (hasta_id !== undefined && hasta_id !== null) {
+        fetch('/hasta-sil/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken'), // CSRF token'ı buradan alıyoruz
+            },
+            body: JSON.stringify({ 'hasta_id': hasta_id }), // hasta_id'yi JSON formatında gönderiyoruz
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                
+                alert(data.message);
+                
+                searchHasta();
+            } else {
+                
+                alert(data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Hasta silinirken bir hata oluştu:', error);
+        });
+    } else {
+        console.error('Geçersiz hasta IDsi.');
+    }
+}
+    
+    // CSRF token'ını almak için yardımcı bir fonksiyon
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = cookies[i].trim();
+                // Belirli bir isimle başlayan çerezleri bulun
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+</script>
+
+
+<div id="doktorEkleForm" style="display: none;" class="container mt-4">
+    <h2>Doktor Ekle</h2>
+    <form id="formDoktorEkle" method="POST" action="{% url 'doktor-ekle' %}">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="doktorAdi">Doktor Adı:</label>
+            <input type="text" class="form-control" id="doktorAdi" name="doktorAdi" required>
+        </div>
+        <div class="form-group">
+            <label for="doktorSoyadi">Doktor Soyadı:</label>
+            <input type="text" class="form-control" id="doktorSoyadi" name="doktorSoyadi" required>
+        </div>
+        <div class="form-group">
+            <label for="uzmanlikAlani">Uzmanlık Alanı:</label>
+            <input type="text" class="form-control" id="uzmanlikAlani" name="uzmanlikAlani" required>
+        </div>
+        <div class="form-group">
+            <label for="hastaneAdi">Hastane Adı:</label>
+            <input type="text" class="form-control" id="hastaneAdi" name="hastaneAdi" required>
+        </div>
+
+
+        <div class="form-group">
+            <label for="sifre">Şifre:</label>
+            <input type="password" class="form-control" id="sifre" name="sifre" required>
+        </div>
+
+
+        <button type="submit" class="btn btn-primary">Ekle</button>
+    </form>
+</div>
+
+</div>
+
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var formDoktorEkle = document.getElementById("formDoktorEkle");
+        formDoktorEkle.addEventListener("submit", function(event) {
+            event.preventDefault(); // Formun otomatik olarak gönderilmesini engelle
+
+            var formData = new FormData(formDoktorEkle);
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "{% url 'doktor-ekle' %}", true);
+            xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest"); // AJAX isteği olduğunu belirtmek için başlık ekle
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    // Başarılı bir şekilde yanıt alındığında
+                    var response = JSON.parse(xhr.responseText);
+                    if (response.success) {
+                        showSuccessMessage(response.message);
+                        clearFormFields(); // Form alanlarını temizle
+                    } else {
+                        alert("Bir hata oluştu. Lütfen tekrar deneyin.");
+                    }
+                }
+            };
+            xhr.send(formData);
+        });
+    });
+
+    function showSuccessMessage(message) {
+        alert(message); // Başarılı mesajı göster
+    }
+
+    function clearFormFields() {
+        
+        document.getElementById("ad").value = "";
+        document.getElementById("soyad").value = "";
+        document.getElementById("dogumTarihi").value = "";
+        document.getElementById("cinsiyet").value = "";
+        document.getElementById("telefon").value = "";
+        document.getElementById("adres").value = "";
+        document.getElementById("doktorAdi").value = "";
+        document.getElementById("doktorSoyadi").value = "";
+        document.getElementById("uzmanlikAlani").value = "";
+        document.getElementById("hastaneAdi").value = "";
+    }
+</script>
+
+
+
+
+
+<div id="doktorSilForm" style="display: none;" class="container mt-4">
+    <h2>Doktor Sil veya Güncelle</h2>
+    <input type="text" id="doktorAraInput" class="form-control mb-2" placeholder="Doktorun Adı Soyadı">
+    <div id="doktorListesi" class="mb-3"></div>
+    <button class="btn btn-primary" onclick="searchDoktor()">Ara</button>
+    <div id ="silmeMesajı" class="mt-3"></div>
+</div>
+
+
+<div id="doktorEditForm" style="display: none;" class="container mt-4">
+    <h2>Doktor Güncelle</h2>
+    <input type="text" id="editDoktorAdi" class="form-control mb-2" placeholder="Doktorun Adı">
+    <input type="text" id="editDoktorSoyadi" class="form-control mb-2" placeholder="Doktorun Soyadı">
+    <input type="text" id="editUzmanlikAlani" class="form-control mb-2" placeholder="Uzmanlık Alanı">
+    <input type="text" id="editHastaneAdi" class="form-control mb-2" placeholder="Hastane Adı">
+    
+</div>
+
+<script>
+    function searchDoktor() {
+        var doktorAraInput = document.getElementById("doktorAraInput").value;
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "{% url 'doktor-ara' %}?doktor_ad=" + doktorAraInput, true);
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                var response = JSON.parse(xhr.responseText);
+                displayDoktorList(response.doktorlar);
+            }
+        };
+        xhr.send();
+    }
+
+    function displayDoktorList(doktorlar) {
+        var doktorListesiDiv = document.getElementById("doktorListesi");
+        doktorListesiDiv.innerHTML = "";
+        if (doktorlar.length > 0) {
+            var ul = document.createElement("ul");
+            ul.classList.add("list-group");
+            doktorlar.forEach(function (doktor) {
+                var li = document.createElement("li");
+                li.classList.add("list-group-item");
+                li.appendChild(document.createTextNode(doktor.ad + " " + doktor.soyad));
+                
+                // Sil butonu
+                var silButton = document.createElement("button");
+                silButton.classList.add("btn", "btn-danger", "btn-sm", "float-right", "mr-2");
+                silButton.textContent = "Sil";
+                silButton.setAttribute("data-doktor-id", doktor.id);
+                silButton.onclick = function () {
+                    deleteDoktor(silButton.getAttribute("data-doktor-id")); 
+                };
+                li.appendChild(silButton);
+                
+                // Güncelleme butonu
+                var updateButton = document.createElement("button");
+                updateButton.classList.add("btn", "btn-primary", "btn-sm", "float-right", "mr-2");
+                updateButton.textContent = "Güncelle";
+                updateButton.setAttribute("data-doktor-id", doktor.id);
+                updateButton.onclick = function () {
+                    showEditForm(doktor);
+                };
+                li.appendChild(updateButton);
+                
+                ul.appendChild(li);
+            });
+            doktorListesiDiv.appendChild(ul);
+        } else {
+            doktorListesiDiv.innerHTML = "Doktor bulunamadı.";
+        }
+    }
+
+
+    function deleteDoktor(doktor_id) {
+       
+        if (doktor_id) {
+            
+            fetch('/doktor-sil/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken'), 
+                },
+                body: JSON.stringify({ 'doktor_id': doktor_id }), 
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    
+                    alert(data.message);
+                  
+                    searchDoktor();
+                } else {
+                   
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+               
+                console.error('Doktor silinirken bir hata oluştu:', error);
+            });
+        } else {
+          
+            console.error('Geçersiz Doktor IDsi.');
+        }
+    }
+    
+
+function showEditForm(doktor) {
+ 
+    var editFormDiv = document.getElementById("doktorEditForm");
+    editFormDiv.style.display = "block"; 
+
+    var adInput = document.getElementById("editDoktorAdi");
+    adInput.value = doktor.ad;
+
+    var soyadInput = document.getElementById("editDoktorSoyadi");
+    soyadInput.value = doktor.soyad;
+
+    var uzmanlikInput = document.getElementById("editUzmanlikAlani");
+    if (doktor.uzmanlik) {
+        uzmanlikInput.value = doktor.uzmanlik;
+    } else {
+        console.log("Uzmanlık alanı bilgisi eksik."); 
+    }
+
+    var hastaneInput = document.getElementById("editHastaneAdi");
+    if (doktor.hastane) {
+        hastaneInput.value = doktor.hastane;
+    } else {
+        console.log("Hastane bilgisi eksik."); 
+    }
+
+
+           
+          var existingsilButton = document.querySelector("#doktorEditForm button");
+          if (existingsilButton) {
+              existingsilButton.remove();
+          }
+
+
+    var updateButton = document.createElement("button");
+    updateButton.classList.add("btn", "btn-primary");
+    updateButton.textContent = "Güncelle";
+    updateButton.onclick = function () {
+        var doktorId = doktor.id;
+        updateDoktor(doktorId);
+    };
+    editFormDiv.appendChild(updateButton);
+
+}
+
+function updateDoktor(doktor_id) {
+    
+    
+    var ad = document.getElementById("editDoktorAdi").value;
+    var soyad = document.getElementById("editDoktorSoyadi").value;
+    var uzmanlik = document.getElementById("editUzmanlikAlani").value;
+    var hastane = document.getElementById("editHastaneAdi").value;
+    console.log("Doktor ID:", doktor_id);
+ 
+    fetch('/doktor-guncelle/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken'),
+        },
+        body: JSON.stringify({
+            'doktor_id': doktor_id, 
+            'ad': ad,
+            'soyad': soyad,
+            'uzmanlik': uzmanlik,
+            'hastane': hastane
+        }),
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            searchDoktor(); // Doktorları yeniden listele
+        } else {
+            alert(data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Doktor güncellenirken bir hata oluştu:', error);
+    });
+}
+
+
+    // CSRF token'ını almak için yardımcı bir fonksiyon
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = cookies[i].trim();
+                // Belirli bir isimle başlayan çerezleri bulun
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+</script>
+
+
+
+
+
+<script>
+function getDoktorInfo(doktorId) {
+    var doktorId = document.getElementById("doktorIdInput").value;
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", "/doktor-bilgi/" + doktorId, true); // Doktor bilgilerini getirmek için uygun URL'yi kullanın
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            var doktor = JSON.parse(xhr.responseText);
+            displayDoktorInfo(doktor);
+        }
+    };
+    xhr.send();
+}
+
+
+
+function displayDoktorInfo(doktor) {
+    var doktorInfoDiv = document.getElementById("doktorInfo");
+    doktorInfoDiv.innerHTML = ""; // Önceki doktor bilgilerini temizle
+
+    var ul = document.createElement("ul");
+    ul.classList.add("list-group");
+
+    var adLi = document.createElement("li");
+    adLi.classList.add("list-group-item");
+    adLi.appendChild(document.createTextNode("Adı: " + doktor.ad));
+
+    var soyadLi = document.createElement("li");
+    soyadLi.classList.add("list-group-item");
+    soyadLi.appendChild(document.createTextNode("Soyadı: " + doktor.soyad));
+
+    var uzmanlikAlaniLi = document.createElement("li");
+    uzmanlikAlaniLi.classList.add("list-group-item");
+    uzmanlikAlaniLi.appendChild(document.createTextNode("Uzmanlık Alanı: " + doktor.uzmanlik_alani));
+
+    var hastaneIsmiLi = document.createElement("li");
+    hastaneIsmiLi.classList.add("list-group-item");
+    hastaneIsmiLi.appendChild(document.createTextNode("Hastane İsmi: " + doktor.hastane_ismi));
+
+    ul.appendChild(adLi);
+    ul.appendChild(soyadLi);
+    ul.appendChild(uzmanlikAlaniLi);
+    ul.appendChild(hastaneIsmiLi);
+
+    doktorInfoDiv.appendChild(ul);
+}
+
+</script>
+
+
+<script>
+    function toggleHastaEkleForm() {
+        var form = document.getElementById("hastaEkleForm");
+        if (form.style.display === "none") {
+            form.style.display = "block";
+            hideOtherForms("hastaEkleForm");
+        } else {
+            form.style.display = "none";
+        }
+    }
+    function togglehastaGuncelleForm() {
+        var form = document.getElementById("hastaGüncelleForm");
+        if (form.style.display === "none") {
+            form.style.display = "block";
+            hideOtherForms("hastaGüncelleForm");
+        } else {
+            form.style.display = "none";
+        }
+    }
+    function toggleHastaSilForm() {
+        var form = document.getElementById("hastaSilForm");
+        if (form.style.display === "none") {
+            form.style.display = "block";
+            hideOtherForms("hastaSilForm");
+        } else {
+            form.style.display = "none";
+        }
+    }
+    
+
+    function toggleDoktorEkleForm() {
+        var form = document.getElementById("doktorEkleForm");
+        if (form.style.display === "none") {
+            form.style.display = "block";
+            hideOtherForms("doktorEkleForm");
+        } else {
+            form.style.display = "none";
+        }
+    }
+
+    function toggleDoktorSilForm() {
+        var form = document.getElementById("doktorSilForm");
+        if (form.style.display === "none") {
+            form.style.display = "block";
+            hideOtherForms("doktorSilForm");
+        } else {
+            form.style.display = "none";
+        }
+    }
+
+    function toggleDoktorGuncelleForm() {
+        var form = document.getElementById("doktorGuncelleForm");
+        if (form.style.display === "none") {
+            form.style.display = "block";
+            hideOtherForms("doktorGuncelleForm");
+        } else {
+            form.style.display = "none";
+        }
+    }
+
+   
+
+    function hideOtherForms(currentFormId) {
+        var formIds = ["hastaEkleForm", "hastaSilForm", "hastaGüncelleForm", "doktorEkleForm", "doktorSilForm", "doktorGuncelleForm"];
+        formIds.forEach(function(id) {
+            if (id !== currentFormId) {
+                document.getElementById(id).style.display = "none";
+            }
+        });
+    }
+</script>
+
+
+
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+</body>
+</html>

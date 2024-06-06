@@ -1,0 +1,60 @@
+/* Resimlerin boyutunu ayarla */
+img {
+    width: 20px;
+    height: 20px;
+}
+
+/* Resimlerin kenarlarını yuvarla */
+img {
+    border-radius: 10px;
+}
+
+/* Resimlerin altındaki bağlantıları kaldır */
+a {
+    text-decoration: none;
+}
+body {
+    font-family: Arial, sans-serif;
+}
+.login-container {
+    max-width: 300px;
+    margin: 50px auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+.login-container h2 {
+    text-align: center;
+}
+.login-container input[type="text"],
+.login-container input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+.login-container input[type="submit"] {
+    width: 100%;
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px;
+    margin: 8px 0;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+.login-container input[type="submit"]:hover {
+    background-color: #45a049;
+}
+.image-container {
+    text-align: center; /* Resimlerin ortalanması için */
+}
+login-container {
+            margin-top: 20px;
+        }
+       
+       
+       
+        

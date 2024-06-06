@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Randevularım</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script>
+        function toggleSearchForm(formId) {
+            var form = document.getElementById(formId);
+            if (form.style.display === "none") {
+                form.style.display = "block";
+            } else {
+                form.style.display = "none";
+            }
+        }
+
+        function toggleSearchFormHastalar() {
+            var form = document.getElementById('searchFormHastalar');
+            if (form.style.display === "none") {
+                form.style.display = "block";
+            } else {
+                form.style.display = "none";
+            }
+        }
+
+
+        
+
+
+
+    </script>
+</head>
+<body>
+    <div class="container">
+        <!-- Kullanıcı bilgileri bölümü -->
+        {% if request.session.doktor_ad and request.session.doktor_soyad %}
+            <h1>Hoşgeldiniz, {{ request.session.doktor_ad }} {{ request.session.doktor_soyad }}!</h1>
+        {% else %}
+            <h1>Hoşgeldiniz!</h1>
+        {% endif %}
+        <div class="row">
+            <div class="col-md-auto">
+                <a href="#" class="btn btn-primary mt-4 mr-1" onclick="toggleSearchFormHastalar()">Hastalarım</a>
+                <div id="searchFormHastalar" style="display: none;">
+                    <h1>Hastalarım</h1>
+                    <input type="text" id="searchInput" class="form-control mb-3" placeholder="Hasta adı veya soyadı ara...">
+                    <table class="table table-bordered" id="randevuTable">
+                        <thead>
+                            <tr>
+                                <th>Randevu ID</th>
+                                <th>Tarih</th>
+                                <th>Saat</th>
+                                <th>Hasta Adı</th>
+                                <th>Hasta Soyadı</th>
+                                <th>Hasta Telefon</th>
+                                <th>Uzmanlık Alanı</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for randevu in randevular %}
+                                <tr>
+                                    <td>{{ randevu.randevu_id }}</td>
+                                    <td>{{ randevu.tarih }}</td>
+                                    <td>{{ randevu.saat }}</td>
+                                    <td>{{ randevu.hasta_ad }}</td>
+                                    <td>{{ randevu.hasta_soyad }}</td>
+                                    <td>{{ randevu.hasta_telefon }}</td>
+                                    <td>{{ randevu.uzmanlik }}</td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="6">Hiç randevu bulunamadı.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="col-md-auto">
+                <a href="#" class="btn btn-primary mt-4" onclick="toggleSearchForm('searchFormRapor')">Tıbbi Rapor</a>
+                <div id="searchFormRapor" style="display: none;">
+                    <form method="post" enctype="multipart/form-data" action="{% url 'upload_file' %}">
+                        {% csrf_token %}
+                        <input type="file" name="dosya" required>
+                        <button type="submit">Yükle</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+
+
+    <script>
+        document.getElementById('searchInput').addEventListener('keyup', function() {
+            var searchValue = this.value.toLowerCase();
+            var rows = document.querySelectorAll('#randevuTable tbody tr');
+            rows.forEach(function(row) {
+                var hastaAd = row.cells[3].textContent.toLowerCase();
+                var hastaSoyad = row.cells[4].textContent.toLowerCase();
+                if (hastaAd.includes(searchValue) || hastaSoyad.includes(searchValue)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
